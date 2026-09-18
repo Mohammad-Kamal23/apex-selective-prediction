@@ -190,8 +190,8 @@ corpus and made its classes separable by silhouette alone. Full breakdown in
 
 ## Data
 
-The six corpora are public and are **not redistributed here**. Download links,
-licences and the exact class structure are in [docs/DATASETS.md](docs/DATASETS.md).
+The six corpora are public. For convenience and exact reproducibility, the complete prepared dataset is available and can be downloaded directly from this [Google Drive folder](https://drive.google.com/drive/folders/1aw46s335myHFG8cw2GPukRc6vbIVd4PH?usp=sharing). Download links,
+licences and the exact class structure are also detailed in [docs/DATASETS.md](docs/DATASETS.md).
 `results/repair_report.json` freezes the exact image count and class list per
 dataset so the splits can be rebuilt identically.
 

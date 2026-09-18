@@ -1,0 +1,5 @@
+To replicate the APEX Selective Prediction research, download the complete prepared dataset bundle from this Google Drive link:
+
+https://drive.google.com/drive/folders/1aw46s335myHFG8cw2GPukRc6vbIVd4PH?usp=sharing
+
+This bundle contains the original checkpoints, cached features, and the full image corpora necessary for replication.
