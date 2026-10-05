@@ -1,7 +1,7 @@
 # Reproducing the paper
 
-Three levels, in increasing cost. Level 1 needs nothing but this repository and a
-laptop. Levels 2 and 3 need artefacts too large for version control, listed at the
+Three levels, in increasing cost. Level 1 needs only this repository and a
+CPU. Levels 2 and 3 need artefacts too large for version control, listed at the
 bottom.
 
 ---
@@ -11,9 +11,13 @@ bottom.
 **Cost: about one minute, CPU only. No GPU, no model weights, no image data.**
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-lock.txt   # exact versions, Python 3.12+ (or requirements.txt for any recent versions)
 python reproduce.py
 ```
+
+With the lock file step 1 matches to `0.000e+00`. Newer library releases can move a single
+value in the 7th decimal (scikit-learn 1.9 changed `log_loss` internals); the script reports
+that as float noise and still fails on anything above `1e-6`.
 
 This works because `results/probs/` contains, for each of the 90
 (dataset × backbone × fold) cells, the **held-out predictions of every method** —

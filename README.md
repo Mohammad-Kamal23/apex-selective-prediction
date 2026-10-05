@@ -1,8 +1,12 @@
 # APEX — Latent-Space Kernel Fusion for Selective Prediction with Frozen Medical Image Classifiers
 
-Code, data manifests, held-out predictions and the full analysis chain for the
-paper. Everything reported in the paper can be regenerated from this repository
-on a laptop CPU in about a minute.
+[![reproduce](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml/badge.svg)](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
+[![Paper](https://img.shields.io/badge/paper-PDF-red)](paper/APEX_paper.pdf)
+
+Code, data manifests, held-out predictions and analysis scripts for the paper.
+The paper's tables and figures can be recomputed from this repository on a CPU
+(see [docs/REPRODUCE.md](docs/REPRODUCE.md)).
 
 **Mohammad Kamal Abdulaziz**, Department of Data Science and Artificial Intelligence,
 The University of Jordan · supervised by **Dr. Rizik Al-Sayyed**, Department of
@@ -51,15 +55,22 @@ calibration error is not the method with the lowest selective risk.
 ## Reproduce it
 
 ```bash
-git clone <this repo>
+git clone https://github.com/Mohammad-Kamal23/apex-selective-prediction.git
 cd apex-selective-prediction
-pip install -r requirements.txt
+pip install -r requirements-lock.txt   # exact versions (Python 3.12+); or requirements.txt for any recent versions
 python reproduce.py
 ```
 
-No GPU. No trained weights. No image data. About a minute.
+No GPU. No trained weights. No image data. About a minute. The same command runs on
+every push in [GitHub Actions](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml), so the badge
+above shows whether the published numbers still regenerate.
 
-`reproduce.py` runs five steps:
+With `requirements-lock.txt` every recomputed value matches exactly. With newer library
+releases a single value can differ in the 7th decimal (scikit-learn 1.9 changed
+`log_loss` internals); `reproduce.py` reports that as float noise instead of failing,
+and anything larger still fails.
+
+`reproduce.py` runs seven steps:
 
 1. **Recompute every metric from the committed predictions.** It loads the 90
    held-out prediction files in `results/probs/` and recomputes all nineteen
@@ -108,6 +119,8 @@ from the committed predictions, from the cached features, and from the raw image
 
 ```
 reproduce.py            one command; regenerates and checks everything
+requirements-lock.txt   exact versions for a bit-for-bit match
+.github/workflows/      CI that runs reproduce.py on every push
 src/
   apex_pipeline.py      the full pipeline: repair, train, extract, bench, analyse
   clean_datasets.py     the leakage audit and quarantine tool
@@ -203,11 +216,28 @@ dataset so the splits can be rebuilt identically.
                with Frozen Medical Image Classifiers},
   author    = {Abdulaziz, Mohammad Kamal and Al-Sayyed, Rizik},
   year      = {2026},
-  note      = {IEEE CIS Jordan AI Research Contest, Track A}
+  note      = {IEEE CIS Jordan AI Research Contest, Track A},
+  url       = {https://github.com/Mohammad-Kamal23/apex-selective-prediction}
 }
 ```
 
-## Licence
+## Use APEX on your own model
 
-Code is released under the MIT Licence (see `LICENSE`). The datasets are the
-property of their respective providers and are governed by their own terms.
+`src/apex_pipeline.py` is the exact code behind the paper. The method itself - frozen-backbone features plus
+descriptors, a 64-d SVD projection, RBF / cubic / k-NN experts and an NLL-fitted, confidence-gated mixture with
+the original softmax - only needs a frozen model's penultimate features, its probabilities and labelled examples,
+so it can sit on top of any classifier. For commercial use, see below.
+
+## License and commercial use
+
+The code is released under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**.
+
+- **Free** for research, teaching, personal study, testing and evaluation, and for use by
+  universities, schools, public research institutions, charities and government bodies.
+- **Commercial use requires permission.** If you want to use APEX in a product, a paid
+  service or inside a company, email **moh203.kamal@gmail.com** with a short description
+  of the use; commercial licenses are granted case by case.
+
+Copies of the code must keep the `Required Notice:` lines at the top of `LICENSE`.
+The datasets are the property of their respective providers and are governed by their
+own terms (see `docs/DATASETS.md`).

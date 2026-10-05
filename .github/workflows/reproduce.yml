@@ -1,0 +1,27 @@
+# Regenerates every number in the paper from the committed predictions on each push.
+# Same command a reader runs locally: pip install -r requirements-lock.txt && python reproduce.py
+name: reproduce
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: pip install -r requirements-lock.txt
+      - run: python reproduce.py
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: reproduced-outputs
+          path: _reproduced/
+          if-no-files-found: ignore

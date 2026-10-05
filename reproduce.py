@@ -54,6 +54,7 @@ METRICS = ["BAcc", "F1", "AUC", "ECE", "dECE", "SCE", "Brier", "BSS", "NLL",
 
 FAIL: list[str] = []
 NOTE: list[str] = []
+FLOAT_NOISE = 1e-6   # largest recomputation difference still treated as floating-point noise (paper reports 4 dp)
 
 
 def head(n, s):
@@ -130,8 +131,15 @@ def step1_recompute(ap, rows):
     for m in METRICS:
         print(f"  {m:<10}{dev[m]:<32.3e}{worst[m]}")
     print()
-    ck("every recomputed metric matches the published CSV",
-       max(dev.values()) < 1e-9, f"max |Δ| = {max(dev.values()):.3e}")
+    # Exact with the pinned environment (requirements-lock.txt). Newer library releases can move a single value in
+    # the 7th decimal (scikit-learn 1.9 changed log_loss internals: one NLL cell moves by 1.4e-7). That is float
+    # noise, far below the 4 decimals the paper reports, so it is reported but not failed. Anything larger fails.
+    worst = max(dev.values())
+    detail = f"max |Δ| = {worst:.3e}"
+    if 1e-9 <= worst < FLOAT_NOISE:
+        detail += "  (float noise from library versions; exact 0 with requirements-lock.txt)"
+        NOTE.append(f"step 1: max |Δ| = {worst:.3e} -- library float noise, not a result difference")
+    ck("every recomputed metric matches the published CSV", worst < FLOAT_NOISE, detail)
     return n_cells
 
 
@@ -372,6 +380,8 @@ def main():
     step7_compare()
 
     print(f"\n{'=' * 78}")
+    for n in NOTE:
+        print(f"  note: {n}")
     if FAIL:
         print(f"  {len(FAIL)} CHECK(S) FAILED")
         for f in FAIL:
