@@ -16,20 +16,17 @@ Business Information Technology, The University of Jordan.
 
 ## What the method does
 
-A classifier that is allowed to abstain is judged less by how often it is right
-than by how well its confidence *orders* its own mistakes. APEX is a post-hoc
-layer that improves that ordering without touching the network. It leaves the
-backbone frozen, reads the penultimate representation the classifier computes and
-then discards, concatenates it with 62 image descriptors, projects the pair onto a
-64-dimensional subspace by truncated SVD, fits three kernel experts there (RBF
-SVM, cubic-polynomial SVM, k-NN), and mixes their posteriors with the original
-softmax under a confidence-conditional gate. The mixture weights are fitted by
-minimising negative log-likelihood — a strictly proper scoring rule.
+APEX is a post-hoc layer for a frozen classifier that may abstain on uncertain
+cases. It takes the classifier's penultimate features, adds 62 image descriptors,
+projects both to 64 dimensions with truncated SVD and fits three kernel experts
+there (RBF SVM, cubic-polynomial SVM, k-NN). A confidence-dependent gate mixes the
+experts' probabilities with the original softmax; the mixture weights are fitted
+by minimising negative log-likelihood. The backbone is not changed.
 
-## Headline result
+## Results
 
 Mean over 18 configurations (6 imaging modalities × 3 backbones, five-fold
-cross-validation, 90 trained heads). Arrows give the preferred direction.
+cross-validation, 90 trained heads). ↑ higher is better, ↓ lower is better.
 
 | Method | BAcc ↑ | ECE ↓ | SCE ↓ | Brier ↓ | NLL ↓ | AURC ↓ | Risk@90 ↓ |
 |---|---|---|---|---|---|---|---|
@@ -41,16 +38,14 @@ cross-validation, 90 trained heads). Arrows give the preferred direction.
 | Dirichlet      | 0.8580 | **0.0299** | 0.0304 | 0.1930 | 0.3443 | 0.0447 | 0.1014 |
 | **APEX**       | **0.8941** | 0.0339 | **0.0297** | **0.1432** | **0.2589** | **0.0271** | **0.0652** |
 
-AURC, Brier and NLL improve in **all 18 of 18** configurations against **every one
-of the six baselines**, at p = 7.6 × 10⁻⁶ — the smallest value a two-sided
-Wilcoxon signed-rank test can return at n = 18. Balanced accuracy and risk at 90%
-coverage do so in at least 17 of 18.
+AURC, Brier and NLL improve in all 18 configurations against all six baselines
+(two-sided Wilcoxon signed-rank test, p = 7.6 × 10⁻⁶, the smallest possible value
+at n = 18). Balanced accuracy and risk at 90% coverage improve in at least 17 of 18.
 
-Expected calibration error does **not** improve past the parametric calibrators,
-and the paper says so plainly. That asymmetry is the point: selective risk is
-invariant to any strictly monotone rescaling of confidence and ECE is not
-(Proposition 1), and in 15 of 18 configurations the method with the lowest
-calibration error is not the method with the lowest selective risk.
+Expected calibration error (ECE) is not better than the parametric calibrators.
+Selective risk does not change under a strictly increasing rescaling of confidence
+while ECE does (Proposition 1), and in 15 of 18 configurations the method with the
+lowest ECE is not the method with the lowest selective risk.
 
 ## Reproduce it
 
@@ -61,9 +56,9 @@ pip install -r requirements-lock.txt   # exact versions (Python 3.12+); or requi
 python reproduce.py
 ```
 
-No GPU. No trained weights. No image data. About a minute. The same command runs on
-every push in [GitHub Actions](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml), so the badge
-above shows whether the published numbers still regenerate.
+It needs only a CPU and the files in this repository (no GPU, trained weights or
+images). [GitHub Actions](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml)
+runs the same command on every push; the badge above shows the latest result.
 
 With `requirements-lock.txt` every recomputed value matches exactly. With newer library
 releases a single value can differ in the 7th decimal (scikit-learn 1.9 changed
@@ -72,26 +67,21 @@ and anything larger still fails.
 
 `reproduce.py` runs seven steps:
 
-1. **Recompute every metric from the committed predictions.** It loads the 90
+1. Recompute the metrics from the committed predictions: it loads the 90
    held-out prediction files in `results/probs/` and recomputes all nineteen
-   metrics. It does *not* reimplement them — it imports `evaluate_all` from
-   `src/apex_pipeline.py`, the same function that produced the paper, and applies
-   it to the same predictions. The result is compared against
+   metrics with `evaluate_all` from `src/apex_pipeline.py`, the function that
+   produced the paper. The result is compared with
    `results/FINAL_RESULTS_perfold.csv`, the file the paper's tables are built
-   from. **Expected output: max |Δ| = 0.000e+00.** If the tables had been built
-   from anything other than these predictions, this step fails.
+   from. Expected output: max |Δ| = 0.000e+00.
 2. Rebuild Table I — the mean over the 18 configurations.
 3. Rebuild Table II — Wilcoxon signed-rank tests and mean ranks.
-4. Re-derive **every number quoted in the paper** from the CSV
-   (`analysis/verify_claims.py`, 69 assertions across four rounds), including the
-   figures quoted in the abstract, the ablation deltas, the τ sweep and the
-   per-dataset reductions.
-5. Verify **Proposition 1** numerically (`analysis/rq1_invariance.py`).
+4. Re-derive the numbers quoted in the paper from the CSV
+   (`analysis/verify_claims.py`, 69 assertions), including the abstract, the
+   ablation deltas, the τ sweep and the per-dataset reductions.
+5. Check Proposition 1 numerically (`analysis/rq1_invariance.py`).
 6. Redraw all four figures.
-7. **Compare what you just generated against our committed reference outputs** —
-   `reference_outputs/` holds the tables and statistics files our run produced, and
-   step 7 diffs yours against them. This is the direct answer to "do I get the same
-   thing you got?"
+7. Compare the generated tables and statistics with `reference_outputs/`, the
+   files from our run.
 
 Exit status is 0 only if every check passes. A clean run ends with:
 
@@ -107,10 +97,9 @@ Exit status is 0 only if every check passes. A clean run ends with:
 
 87 checks in total.
 
-`python analysis/rq1_invariance.py` separately verifies Proposition 1 by applying
-five strictly increasing maps to the uncalibrated confidences of all 18
-configurations: AURC does not move in any digit, while ECE ranges from
-4.95 × 10⁻² to 1.44 × 10⁻¹.
+`analysis/rq1_invariance.py` applies five strictly increasing maps to the
+uncalibrated confidences of all 18 configurations: AURC does not change, while
+ECE ranges from 4.95 × 10⁻² to 1.44 × 10⁻¹.
 
 See [docs/REPRODUCE.md](docs/REPRODUCE.md) for the three levels of reproduction —
 from the committed predictions, from the cached features, and from the raw images.
@@ -118,8 +107,8 @@ from the committed predictions, from the cached features, and from the raw image
 ## Layout
 
 ```
-reproduce.py            one command; regenerates and checks everything
-requirements-lock.txt   exact versions for a bit-for-bit match
+reproduce.py            runs the seven steps above
+requirements-lock.txt   exact package versions
 .github/workflows/      CI that runs reproduce.py on every push
 src/
   apex_pipeline.py      the full pipeline: repair, train, extract, bench, analyse
@@ -128,7 +117,7 @@ src/
   probe_geometry.py     the latent-geometry mechanism probe
   RUN_APEX.ps1          Windows launcher
 analysis/
-  verify_claims.py      re-derives every number quoted in the paper
+  verify_claims.py      re-derives the numbers quoted in the paper
   rq1_invariance.py     numerical check of Proposition 1
   stats.py stats2.py    aggregation and significance testing
   mktables.py           emits tab1.tex / tab2.tex
@@ -155,10 +144,9 @@ docs/                   datasets, data audit, reproduction guide
 
 ## The trained models, in 5 MB
 
-The 90 checkpoints are 107 MB each — 9.4 GB — and almost all of it is redundant.
-The backbones are frozen, and we checked rather than assumed it: across all 90
-checkpoints every backbone tensor is **byte-identical**. What actually changed
-during training is 954,823 numbers.
+The 90 checkpoints are 107 MB each (9.4 GB in total), but the backbones are frozen:
+across all 90 checkpoints every backbone tensor is byte-identical. Training changed
+954,823 numbers.
 
 `weights_heads/heads.npz` stores exactly that, and `src/load_trained_model.py`
 rebuilds any model from it:
@@ -169,20 +157,16 @@ model = load_model("ConvNeXt", "BLOODCELL", fold=1)
 ```
 
 It fetches the ImageNet backbone through `timm`/`torchvision`, loads the stored
-tensors, and recomputes a SHA-256 fingerprint of the frozen part to confirm it
-matches what was there during training — so a future change to the upstream
-pretrained weights is reported rather than silently producing different numbers.
+tensors and checks a SHA-256 fingerprint of the frozen part against the one
+recorded during training, so a change to the upstream pretrained weights is reported.
 
-One honest detail. For ViT and ConvNeXt only the classifier weight and bias ever
-change. MobileNetV3 uses batch normalisation, whose running statistics adapt
-during training even with every weight frozen, so its 138 BatchNorm buffers are
-stored too. Those updates come only from the inner training split and never from
-an evaluation fold — we verified this in the training loop — so they carry no
-leakage, but they are part of the trained model and are needed to reproduce it.
-The paper states this in Section IV-C.
+For ViT and ConvNeXt only the classifier weight and bias change. MobileNetV3 uses
+batch normalisation, whose running statistics update during training even with
+frozen weights, so its 138 BatchNorm buffers are stored too. They are updated only
+on the inner training split, never on an evaluation fold (paper, Section IV-C).
 
-Requires `torch` and `timm` (`pip install -r requirements-full.txt`). **None of
-this is needed to reproduce the results** — that is what `results/probs/` is for.
+Loading models requires `torch` and `timm` (`pip install -r requirements-full.txt`).
+Reproducing the results does not; it uses `results/probs/`.
 
 ## Data integrity
 
@@ -196,10 +180,9 @@ in the paper is computed on the 32,251 that remain:
 | Byte-identical duplicate copies within a class | 531 |
 | Images appearing under two different labels (both members removed) | 8 |
 
-The masks were the consequential ones — they were half the nominal ultrasound
-corpus and made its classes separable by silhouette alone. Full breakdown in
-[docs/DATA_AUDIT.md](docs/DATA_AUDIT.md); the audit is rerunnable via
-`src/clean_datasets.py`.
+The masks were about half of the ultrasound files and made its classes separable
+by outline alone. Full breakdown in [docs/DATA_AUDIT.md](docs/DATA_AUDIT.md); the
+audit can be rerun with `src/clean_datasets.py`.
 
 ## Data
 
@@ -223,10 +206,9 @@ dataset so the splits can be rebuilt identically.
 
 ## Use APEX on your own model
 
-`src/apex_pipeline.py` is the exact code behind the paper. The method itself - frozen-backbone features plus
-descriptors, a 64-d SVD projection, RBF / cubic / k-NN experts and an NLL-fitted, confidence-gated mixture with
-the original softmax - only needs a frozen model's penultimate features, its probabilities and labelled examples,
-so it can sit on top of any classifier. For commercial use, see below.
+`src/apex_pipeline.py` is the code behind the paper. The method needs a frozen
+model's penultimate features, its predicted probabilities and labelled examples.
+For commercial use, see below.
 
 ## License and commercial use
 
