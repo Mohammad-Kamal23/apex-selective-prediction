@@ -2,9 +2,8 @@
 
 [![reproduce](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml/badge.svg)](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Draft paper](https://img.shields.io/badge/draft%20paper-PDF-red)](paper/APEX_paper.pdf)
 
-**Status: work in progress.** The paper is a draft; it has not been published or peer-reviewed.
+**Status: work in progress.** The paper is in preparation and is not included in this repository yet.
 
 Code, data manifests, held-out predictions and analysis scripts for the paper.
 The paper's tables and figures can be recomputed from this repository on a CPU
@@ -78,8 +77,8 @@ and anything larger still fails.
 2. Rebuild Table I — the mean over the 18 configurations.
 3. Rebuild Table II — Wilcoxon signed-rank tests and mean ranks.
 4. Re-derive the numbers quoted in the paper from the CSV
-   (`analysis/verify_claims.py`, 69 assertions), including the abstract, the
-   ablation deltas, the τ sweep and the per-dataset reductions.
+   (`analysis/verify_claims.py`), including the ablation deltas, the τ sweep and
+   the per-dataset reductions.
 5. Check Proposition 1 numerically (`analysis/rq1_invariance.py`).
 6. Redraw all four figures.
 7. Compare the generated tables and statistics with `reference_outputs/`, the
@@ -97,7 +96,7 @@ Exit status is 0 only if every check passes. A clean run ends with:
   the committed predictions, and all four figures were redrawn.
 ```
 
-87 checks in total.
+81 checks in total.
 
 `analysis/rq1_invariance.py` applies five strictly increasing maps to the
 uncalibrated confidences of all 18 configurations: AURC does not change, while
@@ -139,8 +138,6 @@ weights_heads/
   heads.npz             all 90 trained models, 5 MB (see below)
   MANIFEST.json         architectures, trained tensors, backbone fingerprints
 figures/                4 figures, PDF and PNG
-paper/                  final PDF, LaTeX source, bibliography, IEEEtran files,
-                        and APEX_overleaf.zip ready to drop into Overleaf
 docs/                   datasets, data audit, reproduction guide
 ```
 
@@ -201,7 +198,7 @@ dataset so the splits can be rebuilt identically.
                with Frozen Medical Image Classifiers},
   author    = {Abdulaziz, Mohammad Kamal and Al-Sayyed, Rizik},
   year      = {2026},
-  note      = {Work in progress, unpublished draft. Prepared for the IEEE CIS Jordan AI Research Contest, Track A},
+  note      = {Work in progress; paper in preparation},
   url       = {https://github.com/Mohammad-Kamal23/apex-selective-prediction}
 }
 ```

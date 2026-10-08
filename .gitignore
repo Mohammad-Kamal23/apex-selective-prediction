@@ -12,3 +12,6 @@ _reproduced/
 /repro.pid
 /repro*.log
 /rq1_invariance.json
+
+# The paper stays out of the repository until it is published
+paper/
