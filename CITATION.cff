@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: "APEX: Latent-Space Kernel Fusion for Selective Prediction with Frozen Medical Image Classifiers"
-message: "If you use this software or its results, please cite the paper."
+message: "If you use this software or its results, please cite it as below. The paper is a work in progress and not yet published."
 type: software
 authors:
   - given-names: Mohammad Kamal

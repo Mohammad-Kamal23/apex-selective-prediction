@@ -2,7 +2,9 @@
 
 [![reproduce](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml/badge.svg)](https://github.com/Mohammad-Kamal23/apex-selective-prediction/actions/workflows/reproduce.yml)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
-[![Paper](https://img.shields.io/badge/paper-PDF-red)](paper/APEX_paper.pdf)
+[![Draft paper](https://img.shields.io/badge/draft%20paper-PDF-red)](paper/APEX_paper.pdf)
+
+**Status: work in progress.** The paper is a draft; it has not been published or peer-reviewed.
 
 Code, data manifests, held-out predictions and analysis scripts for the paper.
 The paper's tables and figures can be recomputed from this repository on a CPU
@@ -194,12 +196,12 @@ dataset so the splits can be rebuilt identically.
 ## Citation
 
 ```bibtex
-@inproceedings{abdulaziz2026apex,
+@misc{abdulaziz2026apex,
   title     = {{APEX}: Latent-Space Kernel Fusion for Selective Prediction
                with Frozen Medical Image Classifiers},
   author    = {Abdulaziz, Mohammad Kamal and Al-Sayyed, Rizik},
   year      = {2026},
-  note      = {IEEE CIS Jordan AI Research Contest, Track A},
+  note      = {Work in progress, unpublished draft. Prepared for the IEEE CIS Jordan AI Research Contest, Track A},
   url       = {https://github.com/Mohammad-Kamal23/apex-selective-prediction}
 }
 ```
